@@ -15,7 +15,6 @@ export const useTodoListViewModel = defineVueModel("TodoList", () => {
   const requestState = ref(RequestState.SUCCESS);
   const isLoading = computed(() => requestState.value === RequestState.LOADING);
   const loadTodos = async () => {
-    console.log("Loading todos...");
     requestState.value = RequestState.LOADING;
     allTodos.value = await MockApi.getTodos();
     requestState.value = RequestState.SUCCESS;
