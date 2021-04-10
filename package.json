@@ -2,7 +2,9 @@
   "name": "vue-model",
   "version": "0.1.0",
   "license": "MIT",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vue-models.umd.js",
   "module": "./dist/vue-models.es.js",
   "exports": {
@@ -17,8 +19,6 @@
     "build": "yarn compile && vite build"
   },
   "dependencies": {
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2",
     "vue": "^3.0.5",
     "vue-router": "^4.0.6"
   },
