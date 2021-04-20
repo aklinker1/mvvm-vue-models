@@ -9,7 +9,7 @@
         :checked="item.completed"
         class="mr-4"
         :class="{ 'opacity-50 pointer-events-none': isTogglingCompleted }"
-        @click.stop.prevent="toggleCompletedAndUpdateList"
+        @click.stop.prevent="$emit('toggled', item.id)"
       />
       <span class="text-white" :class="{ 'opacity-70': item.completed }">{{
         item.name
@@ -27,21 +27,10 @@ export default defineComponent({
   components: { Checkbox },
   props: {
     item: { type: Object as PropType<TodoSearchResult>, default: undefined },
+    isTogglingCompleted: Boolean,
   },
-  emits: ["updateList"],
-  setup(props, { emit }) {
-    const todoId = computed(() => props.item.id);
-    const { toggleCompleted, isTogglingCompleted } = useTodoViewModel(todoId);
-
-    const toggleCompletedAndUpdateList = async () => {
-      await toggleCompleted()
-      emit("updateList");
-    } 
-
-    return {
-      toggleCompletedAndUpdateList,
-      isTogglingCompleted
-    }
+  emits: {
+    toggled: (id: number) => true
   },
 });
 </script>

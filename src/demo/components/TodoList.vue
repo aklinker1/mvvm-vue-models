@@ -6,7 +6,8 @@
         v-for="todo of incompleteTodos"
         :key="todo.id"
         :item="todo"
-        @updateList="loadTodos()"
+        :isTogglingCompleted="isTogglingCompleted"
+        @toggled="toggleCompleted"
       />
     </ul>
 
@@ -16,7 +17,8 @@
         v-for="todo of completedTodos"
         :key="todo.id"
         :item="todo"
-        @updateList="loadTodos()"
+        :isTogglingCompleted="isTogglingCompleted"
+        @toggled="toggleCompleted"
       />
     </ul>
 
@@ -37,6 +39,8 @@ export default defineComponent({
       incompleteTodos,
       loadTodos,
       isLoading,
+      isTogglingCompleted,
+      toggleCompleted,
     } = useTodoListViewModel();
 
     onMounted(loadTodos);
@@ -45,7 +49,9 @@ export default defineComponent({
       completedTodos,
       incompleteTodos,
       isLoading,
-      loadTodos
+      loadTodos,
+      toggleCompleted,
+      isTogglingCompleted
     };
   },
 });
