@@ -186,4 +186,27 @@ Parameters also have to be serializable to a string. You cannot simply pass in a
 
 ### Persistence
 
-TODO
+To persist a view model, include the `persistence` object when defining your view model.
+
+
+```ts
+const useCountViewModel = defineViewModel({
+  name: "count",
+  persistence: {
+    storage: localStorage,
+  },
+  setup() {
+    const count = ref(0);
+    const increment = () => {
+      count.value++;
+    };
+
+    return {
+      count,
+      increment
+    };
+  },
+});
+```
+
+By default, all `ref`'s are persisted and restored. `computed` refs don't need to be stored because they will be recomputed once the ref's they are based off of is restored.
