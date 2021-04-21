@@ -28,6 +28,7 @@ jobs:
           output-file: "false"
       - name: Publish to NPM
         uses: ./.github/actions/publish
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
         with:
           npmAuthToken: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Create Release
