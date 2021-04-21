@@ -1,5 +1,6 @@
 import { computed, isRef, Ref, watch, watchEffect } from "vue";
 import { managePersistedState, PersistenceOptions } from "./persistence";
+import { getRefValue } from "./utils";
 
 /**
  * The allowed types that can be passed as parameters to the view model's `setup` method.
@@ -73,7 +74,7 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
     const getUnwrappedArgs = () => args.map((arg) => arg.value) as TParams;
     const unwrappedArgs = computed(getUnwrappedArgs);
 
-    const getArgsPath = (customArgs: A) => {
+    const getArgsPath = (customArgs: TParams) => {
       const argStringValues = customArgs.map((arg) => arg.toString());
       return [viewModelName, ...argStringValues].join(".");
     };
@@ -101,5 +102,30 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
       persistState?.(argsPath.value, state);
     });
     return state;
+  }
+
+  useViewModel.getState = (
+    ...args: TParams
+  ): PersistedState<TState> | undefined => {
+    const argsPath = [viewModelName, ...args.map((arg) => arg.toString())].join(
+      "."
+    );
+    const cachedState = cachedStates[argsPath];
+    if (cachedState) {
+      const state = {} as PersistedState<TState>;
+      Object.entries(cachedState).forEach(([key, ref]) => {
+        if (ref != null && isRef(ref)) {
+          (state as any)[key] = getRefValue(ref);
+        }
+      });
+      return state;
+    }
+    if (persistence?.storage) {
+      const stateString = persistence.storage.getItem(argsPath);
+      if (stateString != null) return JSON.parse(stateString);
+    }
+    return undefined;
   };
+
+  return useViewModel;
 }
