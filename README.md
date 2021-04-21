@@ -210,3 +210,18 @@ const useCountViewModel = defineViewModel({
 ```
 
 By default, all `ref`'s are persisted and restored. `computed` refs don't need to be stored because they will be recomputed once the ref's they are based off of is restored.
+
+### Getting State from Outside a Component
+
+Sometimes, you need to access the state from inside the scope of something other than a component. For example, in a router hook to check if a user is authenticated before going to the URL or redirecting them to the login.
+
+In this case, you can get the current state from a view model, but it won't be reactive.
+
+```ts
+const state = useAuthViewModel.getState();
+console.log(state?.isLoggedIn);
+```
+
+In this case, if `useAuthViewModel` hasn't been called from a component or it's not persisted to local storage or sessions storage, the resulting state will be `undefined`.
+
+> `getState` also requires parameters when your view model is parameterized.
