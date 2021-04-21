@@ -12,18 +12,19 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/vue-models.umd.js",
-  "module": "./dist/vue-models.es.js",
+  "types": "dist/index.d.ts",
+  "main": "./dist/mvvm-vue-models.umd.js",
+  "module": "./dist/mvvm-vue-models.es.js",
   "exports": {
     ".": {
-      "import": "./dist/vue-models.es.js",
-      "require": "./dist/vue-models.umd.js"
+      "import": "./dist/mvvm-vue-models.es.js",
+      "require": "./dist/mvvm-vue-models.umd.js"
     }
   },
   "scripts": {
     "start": "vite",
     "compile": "vue-tsc --noEmit",
-    "build": "yarn compile && vite build"
+    "build": "yarn compile && vite build && yarn tsc -p tsconfig.lib.json"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.2.1",

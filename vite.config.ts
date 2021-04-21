@@ -6,6 +6,7 @@ import path from "path";
 export default defineConfig({
   plugins: [vue()],
   build: {
+    emptyOutDir: true,
     lib: {
       entry: path.resolve(__dirname, "src/library/index.ts"),
       name: "vue-models",
