@@ -1,9 +1,9 @@
 import { computed, ref } from "vue";
-import { defineVueModel, PersistenceOptions } from "../../library";
+import { defineViewModel, PersistenceOptions } from "../../library";
 import MockApi from "../utils/MockApi";
 import { RequestState } from "../utils/RequestState";
 
-export const useTodoViewModel = defineVueModel({
+export const useTodoViewModel = defineViewModel({
   name: "Todo",
   setup(todoId: number) {
     const todo = ref<Todo | undefined>();

@@ -11,18 +11,18 @@ interface UseViewModel<A extends Arg[], S> {
   (...args: WrapRefs<A>): S;
 }
 
-export function defineVueModel<A extends Arg[], S>(options: {
+export function defineViewModel<A extends Arg[], S>(options: {
   name: string;
   setup: (...args: A) => S;
   persistence?: PersistenceOptions<S>;
 }): UseViewModel<A, S> {
-  const { name: vueModelName, setup, persistence } = options;
+  const { name: viewModelName, setup, persistence } = options;
 
   // Warn if model keys are the same
-  if (modelNames.has(vueModelName)) {
-    console.warn(`Multiple view models defined as \"${vueModelName}\"`);
+  if (modelNames.has(viewModelName)) {
+    console.warn(`Multiple view models defined as \"${viewModelName}\"`);
   } else {
-    modelNames.add(vueModelName);
+    modelNames.add(viewModelName);
   }
 
   const managedPersistence =
@@ -37,7 +37,7 @@ export function defineVueModel<A extends Arg[], S>(options: {
 
     const getArgsPath = (customArgs: A) => {
       const argStringValues = customArgs.map((arg) => arg.toString());
-      return [vueModelName, ...argStringValues].join(".");
+      return [viewModelName, ...argStringValues].join(".");
     };
     const argsPath = computed(() => getArgsPath(unwrappedArgs.value));
 

@@ -1,9 +1,9 @@
 import { computed, ref } from "vue";
-import { defineVueModel } from "../../library";
+import { defineViewModel } from "../../library";
 import MockApi from "../utils/MockApi";
 import { RequestState } from "../utils/RequestState";
 
-export const useTodoListViewModel = defineVueModel({
+export const useTodoListViewModel = defineViewModel({
   name: "TodoList",
   setup() {
     const allTodos = ref<TodoSearchResult[]>([]);
