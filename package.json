@@ -2,6 +2,7 @@
   "name": "mvvm-vue-models",
   "version": "0.1.2",
   "license": "MIT",
+  "keywords": ["vue", "vue.js", "state", "mvvm", "composition"],
   "files": [
     "dist"
   ],
