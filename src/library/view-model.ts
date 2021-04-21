@@ -1,21 +1,58 @@
-import { computed, reactive, Ref, watch, watchEffect } from "vue";
+import { computed, isRef, Ref, watch, watchEffect } from "vue";
 import { managePersistedState, PersistenceOptions } from "./persistence";
 
-type Arg = number | string | { toString: () => string };
+/**
+ * The allowed types that can be passed as parameters to the view model's `setup` method.
+ */
+type Param = number | string | { toString: () => string };
 
-type WrapRefs<T extends Array<Arg>> = { [Key in keyof T]: Ref<T[Key]> };
+/**
+ * The raw values of all refs in an object.
+ *
+ * @example
+ * interface State {
+ *   value: Ref<number>;
+ *   someFunc(): void;
+ * }
+ * // PersistedState<State> is equivalent to
+ * interface EquivalentPersistedState {
+ *   value: number;
+ * }
+ */
+type WrapRefs<T extends Array<Param>> = { [Key in keyof T]: Ref<T[Key]> };
 
 const modelNames = new Set<string>();
 
-interface UseViewModel<A extends Arg[], S> {
-  (...args: WrapRefs<A>): S;
+/**
+ * The result of `defineViewModel`.
+ */
+export interface UseViewModel<TParams extends Param[], TState> {
+  (...args: WrapRefs<TParams>): TState;
+  getState(...args: TParams): PersistedState<TState> | undefined;
 }
 
-export function defineViewModel<A extends Arg[], S>(options: {
+/**
+ * The raw values of all refs in an object.
+ *
+ * @example
+ * interface State {
+ *   value: Ref<number>;
+ *   someFunc(): void;
+ * }
+ * // PersistedState<State> is equivalent to
+ * interface EquivalentPersistedState {
+ *   value: number;
+ * }
+ */
+export type PersistedState<TState> = {
+  [key in keyof TState]: TState[key] extends Ref<infer T> ? T : never;
+};
+
+export function defineViewModel<TParams extends Param[], TState>(options: {
   name: string;
-  setup: (...args: A) => S;
-  persistence?: PersistenceOptions<S>;
-}): UseViewModel<A, S> {
+  setup: (...args: TParams) => TState;
+  persistence?: PersistenceOptions<TState>;
+}): UseViewModel<TParams, TState> {
   const { name: viewModelName, setup, persistence } = options;
 
   // Warn if model keys are the same
@@ -26,13 +63,14 @@ export function defineViewModel<A extends Arg[], S>(options: {
   }
 
   const managedPersistence =
-    persistence && managePersistedState<S>(persistence);
+    persistence && managePersistedState<TState>(persistence);
   const restorePersistedRefs = managedPersistence?.restorePersistedRefs;
   const persistState = managedPersistence?.persistState;
 
-  const cachedStates: Record<string, S | undefined> = {};
-  return function (...args) {
-    const getUnwrappedArgs = () => args.map((arg) => arg.value) as A;
+  const cachedStates: Record<string, TState | undefined> = {};
+
+  function useViewModel(...args: WrapRefs<TParams>) {
+    const getUnwrappedArgs = () => args.map((arg) => arg.value) as TParams;
     const unwrappedArgs = computed(getUnwrappedArgs);
 
     const getArgsPath = (customArgs: A) => {
