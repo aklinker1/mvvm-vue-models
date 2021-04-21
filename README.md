@@ -1,182 +1,187 @@
 # Vue Models
 
-An MVVM (Model-View-ViewModel) state management solution with full typescript support for Vue.js 3!
+An MVVM (Model-View-ViewModel) state management solution with full typescript support and a familiar syntax for Vue.js 3!
 
 ```ts
-const useViewModel = defineVueModel("my-view-model", () => {
-  const someState = ref("some-state");
-  return {
-    someState,
-  };
-});
-```
-
-Features:
-
-- **A localized approach to state management**: Instead of a single, large store with everything in it, create little bundles of logic geared toward a specific purpose
-- **Cleaner code**: Just like the composition API, all relevant logic is in a single place, a single file, instead of spread out across multiple files with other, unrelated code all around it
-- **Exact same syntax as the Composition API**: You don't have to learn anything new if you're already familiar with the Composition API
-- **Builtin utilities for persisting state**: By default, all state is stored in the `SessionStorage`, but solutions for using the `LocalStorage` and _syncing state between tabs_ is also included!
-- **Parameterized state**: When parameters are used in the setup method, different parameter combinations result in separately managed state
-
-## More Examples!
-
-Here are some examples for common UI patterns, and how they are accomplished using this library.
-
-### Basic List of Items
-
-```ts
-const useTodoListViewModel = defineVueModel("todos", () => {
-  const todos = ref<Todo[]>([]);
-  const requestState = ref(RequestState.SUCCESS);
-  const loadTodos = () => {
-    try {
-      requestState.value = RequestState.LOADING;
-      todos.value = await axios.get("/api/todos");
-      requestState.value = RequestState.SUCCESS;
-    } catch (err) {
-      todos.value = [];
-      requestState.value = RequestState.FAILURE;
-    }
-  };
-
-  return {
-    todos,
-    loadTodos,
-  };
-});
-```
-
-```ts
-export default defineComponent(() => {
-  const { todos, loadTodos, requestState } = useTodoListViewModel();
-
-  onMount(loadTodos);
-
-  return {
-    todos,
-    loadTodos,
-  };
-});
-```
-
-### Managing Individual Items by ID
-
-This will store each item in a separate state!
-
-```ts
-const useTodoViewModel = defineViewModel("todo", (id: number) => {
-    const todo = ref<Todo | undefined>(undefined);
-    const name = computed(() => todo.name ?? "No name");
-
-    const loadTodo = () => {
-        todo.value = // ...
-    };
-    const saveTodo = () => {
-        // ...
-    };
-    const deleteTodo = () => {
-        // ...
+const useCountViewModel = defineViewModel({
+  name: "count",
+  setup() {
+    const count = ref(0);
+    const increment = () => {
+      count.value++;
     };
 
     return {
-        todo,
-        name,
-        loadTodo,
-        saveTodo,
-        deleteTodo,
-    }
-})
+      count,
+      increment
+    };
+  },
+});
 ```
 
-The caveat with parameterized view models is that while the setup function shouldn't use reactive parameters, you have to pass in reactive values when using it in a component.
+### Features
 
-Here we're using `vue-router` and pulling the `todoId` from the url:
+#### A Familiar Syntax
+
+You don't have to learn anything new if you're already familiar with the Composition API
+
+#### Parameterized State
+
+When a vue model requires parameters, like an id, each combination of parameters is has it's own state - no need to make maps of ids to state.
+
+#### Built-in Persistence
+
+By default, all state is cached and reset when the page is reloaded, but solutions for persisting state using `sessionStorage` and `localStorage` included!
+
+#### Cleaner Code
+
+Just like the composition API, related logic is in a single place, a single file, instead of spread out across multiple files with other, unrelated code all around it
+
+<br />
+
+## Philosophy
+
+Why not just use Vuex, Redux, Mobx, or any of the other single store state management solutions out there?
+
+Having a single, large object where all the state for your application is stored is not a scalable approach. Yes, it works fine for small applications, but not for much longer as the application grows. Why are things like account info, search results, local edits, etc in the same place? What do they have to do with each other.
+
+> And no, Vuex modules do not solve these problem
+
+Here's a good [presentation by the creator of Vuex](https://www.youtube.com/watch?v=ajGglyQQD0k) on why Vuex v5 is going to be completely different, with no global store.
+
+`vue-models` was built by developer who loves Android's ViewModels, saw this presentation on Vuex 5, was working on a React project with a massive Redux store for work, and realized that there is a better way.
+
+Here are the guiding principles for `vue-models`:
+
+- No single global store
+- Shared, localized state
+- No boilerplate from things like actions/mutations/getters
+
+<br />
+
+## Get Started
+
+Similar to components, before you can use it, you need to define it! Lets look at the view model for a simple counter.
 
 ```ts
-// Small wrapper to make the url param reactive
-function useRouteParam<T>(param: string): Ref<T> {
-    const route = useRoute();
-    const paramValue = ref<T>(route.params[param]);
-    watch(
-        () => route.params,
-        (newParams) => (paramValue.value = newParams.[param])
-    );
-    return paramValue;
-}
+// countViewModel.ts
+import { defineViewModel } from 'vue-models';
 
-// Use the reactive prop in the component's setup method
-export default defineComponent(() => {
-    const todoId = useRouteParam<number>("todoId");
-    const { todo, name, loadTodo } = useTodoViewModel(todoId);
-    watch(todoId, loadTodo);
-
-    return {
-        name,
-    }
-})
-```
-
-This is done because internally, the function returned by `defineVueModel` listens for changes to any of those parameters, and manages each combination of parameters as separate states.
-
-### Search
-
-Using parameterized Vue Models again, but this time to cache results based on some search string:
-
-```ts
-const useTodoListViewModel = defineVueModel(
-  "todo-search",
-  (searchText: string) => {
-    const searchResults = ref<Todo[]>([]);
-    const requestState = ref(RequestState.SUCCESS);
-    const search = () => {
-      try {
-        requestState.value = RequestState.LOADING;
-        searchResults.value = await axios.get("/api/todos", {
-          params: { search: searchText },
-        });
-        requestState.value = RequestState.SUCCESS;
-      } catch (err) {
-        searchResults.value = [];
-        requestState.value = RequestState.FAILURE;
-      }
+export const useCountViewModel = defineViewModel({
+  // The name is used to uniquly identify this view model from others that are defined
+  name: "count",
+  setup() {
+    const count = ref(0);
+    const increment = () => {
+      count.value++;
     };
 
     return {
-      searchResults,
-      search,
+      count,
+      increment
     };
-  }
-);
+  },
+});
 ```
+
+After defining the view model, simply use it in a component like any other custom composition function!
 
 ```vue
 <template>
-  <div>
-    <input type="text" v-model="searchText" />
-    <ul>
-      <li v-for="searchResult of SearchResults" ... />
-    </ul>
-  </div>
+  <p>{{ count }}</p>
+  <button @click="increment">Increment</button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
+import { useCountViewModel } from './countViewModel';
 
-export default defineComponent(() => {
-  const searchText = ref("");
-  const { search, searchResults, requestState } = useTodoListViewModel();
-
-  const timeout = ref<number | undefined>(undefined);
-  watch(searchText, () => {
-    if (timeout.value) clearTimeout(timeout);
-    timeout.value = setTimeout(search, 500);
-  });
-
-  return {
-    searchText,
-    searchResults,
-  };
+export default defineComponent({
+  setup() {
+    // You can destructure anything that was returned from the setup function
+    const { count, increment } = useCountViewModel();
+    
+    // Pull in other view models or do other things...
+    
+    return {
+      count,
+      increment,
+      // ...
+    };
+  },
 });
 </script>
 ```
+
+View model state is shared between all instances that use it. So for example, if you wanted 2 counters, 
+
+### Parameterized State
+
+A view model can be parameterized by adding arguments to the setup function.
+
+```ts
+export const useTodoViewModel = useVueModel({
+  name: "todo",
+  setup(id: number) {
+    const todo = ref<Todo | undefined>();
+    // ...
+    return {
+      todo,
+    };
+  },
+});
+```
+
+Even though the `setup` function is defined to accept a plain `number`, you actually need to pass in a `Ref<number>` when using the view model in a component. In this case, we're using `vue-router` and the todo's ID is apart of the URL:
+
+```ts
+function useRouteParam<T>(param: string): Ref<T> {
+  const route = useRoute();
+  const paramValue = ref<T>(route.params[param]);
+  watch(
+    () => route.params,
+    (newParams) => {
+      paramValue.value = newParams[param];
+    }
+  );
+  return paramValue;
+}
+
+export default defineComponent({
+  setup() {
+    // Get the `Ref<number>`
+    const todoIdString = useRouteParam<string>('todoId');
+    const todoId = computed(() => Number(todoIdString.value));
+    
+    // Pass in the `Ref<number>`
+    const { todo } = useTodoViewModel(todoId);
+    
+    ...
+  },
+});
+```
+
+> By passing in the `Ref` instead of the plain value, the view model is able to react when the arguments are changed and update the state to match the state for the new combination of arguments.
+
+A view model's state is shared between all instances with the same combination of arguments. Keep this in in mind because **parameters can be abused by over parameterizing the view model**. The only parameters that should be passed in are ones that need separate state.
+
+```ts
+const todoId1 = ref(1);
+const todoId2 = ref(2);
+
+const { todo: todoA } = useTodoViewModel(todoId1);
+const { todo: todoB } = useTodoViewModel(todoId1);
+const { todo: todoC } = useTodoViewModel(todoId2);
+
+// `todoA` is the exact same object as `todoB` because their parameters are equal
+console.log(todoA === todoB); // -> true
+
+// `todoC` is different because it's parameter value is different
+console.log(todoA === todoC); // -> false
+console.log(todoB === todoC); // -> false
+```
+
+Parameters also have to be serializable to a string. You cannot simply pass in an object and expect parameterization to work. State is kept secret by creating a hash based on the value of each param's `toString` function. Without a `toString` method, the object could result in `"[object Object]"` instead of some kind of identifier inside the object. `string`s, `number`s, and `boolean`s all work without a custom `toString` function.
+
+
+### Persistence
