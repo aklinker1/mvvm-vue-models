@@ -18,10 +18,6 @@
     "compile": "vue-tsc --noEmit",
     "build": "yarn compile && vite build"
   },
-  "dependencies": {
-    "vue": "^3.0.5",
-    "vue-router": "^4.0.6"
-  },
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.2.1",
     "@vue/compiler-sfc": "^3.0.5",
@@ -31,6 +27,11 @@
     "tailwindcss": "^2.1.1",
     "typescript": "^4.1.3",
     "vite": "^2.1.5",
+    "vue": "^3.0.5",
+    "vue-router": "^4.0.6",
     "vue-tsc": "^0.0.15"
+  },
+  "peerDependencies": {
+    "vue": "3.x"
   }
 }
