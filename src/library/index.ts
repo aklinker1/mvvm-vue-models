@@ -1,2 +1,2 @@
-export * from './vue-model';
+export * from './view-model';
 export type { PersistenceOptions } from './persistence';
