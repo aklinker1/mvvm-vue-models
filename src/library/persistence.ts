@@ -1,4 +1,5 @@
 import { isRef, UnwrapRef } from "vue";
+import { getRefValue } from "./utils";
 
 export interface PersistenceOptions<TState> {
   storage: Storage;
@@ -8,10 +9,6 @@ export interface PersistenceOptions<TState> {
       [key in keyof TState]: (value: any) => UnwrapRef<TState[key]>;
     }
   >;
-}
-
-function getRefValue<T>(ref: Ref<T | undefined>): T | undefined {
-  return ref.value == null ? undefined : JSON.parse(JSON.stringify(ref.value));
 }
 
 export function managePersistedState<TState>({
