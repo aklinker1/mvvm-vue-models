@@ -1,4 +1,5 @@
 import { computed, isRef, Ref, watch, watchEffect } from "vue";
+import logger from "./logger";
 import { managePersistedState, PersistenceOptions } from "./persistence";
 import { getRefValue } from "./utils";
 
@@ -58,7 +59,7 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
 
   // Warn if model keys are the same
   if (modelNames.has(viewModelName)) {
-    console.warn(`Multiple view models defined as \"${viewModelName}\"`);
+    logger.warn(`Multiple view models defined as \"${viewModelName}\"`);
   } else {
     modelNames.add(viewModelName);
   }
@@ -81,8 +82,22 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
     const argsPath = computed(() => getArgsPath(unwrappedArgs.value));
 
     const getState = (argsPath: string) => {
-      const state = cachedStates[argsPath] ?? setup(...unwrappedArgs.value);
-      if (cachedStates[argsPath] == null) {
+      let state: TState;
+      const cachedState = cachedStates[argsPath];
+      if (cachedState != null) {
+        state = cachedState;
+        logger.info(
+          `Reusing cached state for ${argsPath}`,
+          JSON.parse(JSON.stringify(state))
+        );
+      } else {
+        state = setup(...unwrappedArgs.value);
+        logger.info(
+          `Setting up new view model for ${argsPath}`,
+          JSON.parse(JSON.stringify(state))
+        );
+      }
+      if (cachedState == null) {
         cachedStates[argsPath] = state;
       }
       restorePersistedRefs?.(argsPath, state);
@@ -98,7 +113,6 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
       }
     });
     watchEffect(() => {
-      console.log("Something changed");
       persistState?.(argsPath.value, state);
     });
     return state;

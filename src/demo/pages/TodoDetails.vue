@@ -44,7 +44,9 @@ export default defineComponent({
       isTogglingCompleted,
     } = useTodoViewModel(todoId);
 
-    onMounted(loadTodo);
+    onMounted(() => {
+      if (todo.value == null) loadTodo();
+    });
 
     return {
       todo,
