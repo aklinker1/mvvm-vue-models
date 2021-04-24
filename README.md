@@ -113,14 +113,12 @@ export default defineComponent({
 </script>
 ```
 
-View model state is shared between all instances that use it. So for example, if you wanted 2 counters, 
-
 ### Parameterized State
 
 A view model can be parameterized by adding arguments to the setup function.
 
 ```ts
-export const useTodoViewModel = useVueModel({
+export const useTodoViewModel = defineViewModel({
   name: "todo",
   setup(id: number) {
     const todo = ref<Todo | undefined>();
@@ -225,3 +223,13 @@ console.log(state?.isLoggedIn);
 In this case, if `useAuthViewModel` hasn't been called from a component or it's not persisted to local storage or sessions storage, the resulting state will be `undefined`.
 
 > `getState` also requires parameters when your view model is parameterized.
+
+### Enabling the Logger
+
+By default, logs are disabled. It can be useful to enable logs to see when state is being persisted, what gets restored, etc. In your application entry point, usually `main.ts`, simply enable logs:
+
+```ts
+import { logger } from 'mvvm-vue-models';
+
+logger.setEnabled(true);
+```
