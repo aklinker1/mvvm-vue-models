@@ -51,7 +51,7 @@ export const useTodoViewModel = defineViewModel({
     storage: localStorage,
     keysToPersist: ["todo"],
     restoreFields: {
-      todo(value): Todo {
+      todo(value: Todo): Todo {
         return {
           ...value,
           createdAt: new Date(value.createdAt),

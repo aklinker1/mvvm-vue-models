@@ -29,7 +29,6 @@ export const useTodoListViewModel = defineViewModel({
       () => requestState.value === RequestState.LOADING
     );
     const toggleCompleted = async (id: number) => {
-      console.trace("toggleCompleted");
       const searchResult = allTodos.value.find((todo) => todo.id === id);
       if (searchResult == null) {
         console.warn("Cannot toggle a todo that doesn't exist:", id);
