@@ -84,8 +84,8 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
       const state = cachedStates[argsPath] ?? setup(...unwrappedArgs.value);
       if (cachedStates[argsPath] == null) {
         cachedStates[argsPath] = state;
-        restorePersistedRefs?.(argsPath, state);
       }
+      restorePersistedRefs?.(argsPath, state);
       return state;
     };
     const state = getState(argsPath.value);
