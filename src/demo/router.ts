@@ -2,10 +2,11 @@ import {RouteRecordRaw, createRouter, createWebHistory} from 'vue-router';
 import Home from './pages/Home.vue';
 import Overlay from './pages/Overlay.vue';
 import TodoDetails from './pages/TodoDetails.vue';
+import Counts from './pages/Counts.vue';
 
 const routes: RouteRecordRaw[] = [
     {
-        path: "/",
+        path: "/todos",
         component: Home,
         children: [
             {
@@ -24,7 +25,11 @@ const routes: RouteRecordRaw[] = [
                 ]
             }
         ]
-    }
+    },
+    {
+        path: "/counts",
+        component: Counts,
+    },
 ]
 
 const router = createRouter({
