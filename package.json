@@ -21,6 +21,10 @@
       "require": "./dist/mvvm-vue-models.umd.js"
     }
   },
+  "repository": "https://github.com/aklinker1/mvvm-vue-models",
+  "author": "Aaron Klinker <aaronklinker1@gmail.com>",
+  "bugs": "https://github.com/aklinker1/mvvm-vue-models/issues",
+  
   "scripts": {
     "start": "vite",
     "compile": "vue-tsc --noEmit",
