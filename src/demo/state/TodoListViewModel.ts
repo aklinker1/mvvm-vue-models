@@ -1,23 +1,17 @@
-import { computed, ref } from "vue";
-import { defineViewModel } from "../../library";
-import MockApi from "../utils/MockApi";
-import { RequestState } from "../utils/RequestState";
+import { computed, ref } from 'vue';
+import { defineViewModel } from '../../library';
+import MockApi from '../utils/MockApi';
+import { RequestState } from '../utils/RequestState';
 
 export const useTodoListViewModel = defineViewModel({
-  name: "TodoList",
+  name: 'TodoList',
   setup() {
     const allTodos = ref<TodoSearchResult[]>([]);
-    const completedTodos = computed(() =>
-      allTodos.value.filter((todo) => todo.completed)
-    );
-    const incompleteTodos = computed(() =>
-      allTodos.value.filter((todo) => !todo.completed)
-    );
+    const completedTodos = computed(() => allTodos.value.filter(todo => todo.completed));
+    const incompleteTodos = computed(() => allTodos.value.filter(todo => !todo.completed));
 
     const requestState = ref(RequestState.SUCCESS);
-    const isLoading = computed(
-      () => requestState.value === RequestState.LOADING
-    );
+    const isLoading = computed(() => requestState.value === RequestState.LOADING);
     const loadTodos = async () => {
       requestState.value = RequestState.LOADING;
       allTodos.value = await MockApi.getTodos();
@@ -25,11 +19,9 @@ export const useTodoListViewModel = defineViewModel({
     };
 
     const toggleCompletedRequestState = ref(RequestState.SUCCESS);
-    const isTogglingCompleted = computed(
-      () => requestState.value === RequestState.LOADING
-    );
+    const isTogglingCompleted = computed(() => requestState.value === RequestState.LOADING);
     const toggleCompleted = async (id: number) => {
-      const searchResult = allTodos.value.find((todo) => todo.id === id);
+      const searchResult = allTodos.value.find(todo => todo.id === id);
       if (searchResult == null) {
         console.warn("Cannot toggle a todo that doesn't exist:", id);
         return;
@@ -38,7 +30,7 @@ export const useTodoListViewModel = defineViewModel({
       toggleCompletedRequestState.value = RequestState.LOADING;
       const todo = await MockApi.getTodo(id);
       if (todo == null) {
-        console.warn("Could not find todo to toggle:", id);
+        console.warn('Could not find todo to toggle:', id);
         return;
       }
       const newTodo: Todo = {

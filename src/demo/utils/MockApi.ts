@@ -1,27 +1,30 @@
-const todos: Record<number, Omit<Todo, "id">> = {
+import { Todo } from '../@types/Todo';
+import { TodoSearchResult } from '../@types/TodoSearchResult';
+
+const todos: Record<number, Omit<Todo, 'id'>> = {
   1: {
-    name: "Update README.md",
+    name: 'Update README.md',
     createdAt: new Date(),
     completed: false,
-    notes: "Make sure the new feature has been added to the documentation",
+    notes: 'Make sure the new feature has been added to the documentation',
   },
   2: {
-    name: "Update GitHub releases",
+    name: 'Update GitHub releases',
     createdAt: new Date(),
     completed: false,
-    notes: "Delete the old artifacts from v1.2.1",
+    notes: 'Delete the old artifacts from v1.2.1',
   },
   3: {
-    name: "Tried out Vue Models!",
+    name: 'Tried out Vue Models!',
     createdAt: new Date(),
     completed: true,
-    notes: "Tried out the Vue Models library by aklinker1",
+    notes: 'Tried out the Vue Models library by aklinker1',
   },
 };
 
 export default {
   _sleep(ms: number): Promise<void> {
-    return new Promise<void>((res) => setTimeout(res, ms));
+    return new Promise<void>(res => setTimeout(res, ms));
   },
 
   async getTodos(): Promise<TodoSearchResult[]> {
@@ -45,7 +48,7 @@ export default {
     };
   },
 
-  async addTodo(newTodo: Omit<Todo, "id">): Promise<Todo> {
+  async addTodo(newTodo: Omit<Todo, 'id'>): Promise<Todo> {
     await this._sleep(500);
     const id = Object.entries(todos).length + 1;
     todos[id] = newTodo;

@@ -24,12 +24,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useCountViewModel } from "../state/CountViewModel";
+import { defineComponent, ref } from 'vue';
+import { useCountViewModel } from '../state/CountViewModel';
 
 export default defineComponent({
   setup() {
-    const username = ref("");
+    const username = ref('');
     const { count, nextNumber, increment } = useCountViewModel(username);
     return {
       username,

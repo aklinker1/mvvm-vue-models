@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import path from "path";
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,14 +8,14 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     lib: {
-      entry: path.resolve(__dirname, "src/library/index.ts"),
-      name: "vue-models",
+      entry: path.resolve(__dirname, 'src/library/index.ts'),
+      name: 'vue-models',
     },
     rollupOptions: {
-      external: ["vue"],
+      external: ['vue'],
       output: {
         globals: {
-          vue: "Vue",
+          vue: 'Vue',
         },
       },
     },

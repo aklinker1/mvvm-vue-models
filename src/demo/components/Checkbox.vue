@@ -1,11 +1,11 @@
 <template>
   <span class="cursor-pointer">
-    {{ checked ? "✅" : "⬜" }}
+    {{ checked ? '✅' : '⬜' }}
   </span>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   props: {

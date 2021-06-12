@@ -14,7 +14,7 @@ A Model-View-ViewModel state management solution... but what does that even mean
 import { defineViewModel } from 'mvvm-vue-models';
 
 export const useCountViewModel = defineViewModel({
-  name: "count",
+  name: 'count',
   setup() {
     const count = ref(0);
     const increment = () => {
@@ -23,7 +23,7 @@ export const useCountViewModel = defineViewModel({
 
     return {
       count,
-      increment
+      increment,
     };
   },
 });
@@ -49,17 +49,17 @@ export default defineComponent({
 - Full typescript support 🎉
 - The same syntax as the Composition API 👏
 - [Parameterized state](#parameterized-state) 🤖
-- Built-in [persistence](#persistence)  💾
+- Built-in [persistence](#persistence) 💾
 
 ## Docs
 
 ### View Model Names
 
-`defineViewModel` requires a name. Behind the scenes, the state is saved as a `Map<ViewModel.name, ViewModel.state>` and whenever you call `use*ViewModel`, the state is pulled out of that object based on the `name` property. 
+`defineViewModel` requires a name. Behind the scenes, the state is saved as a `Map<ViewModel.name, ViewModel.state>` and whenever you call `use*ViewModel`, the state is pulled out of that object based on the `name` property.
 
 ```ts
 export const useSomeViewModel = defineViewModel({
-  name: "some-name",
+  name: 'some-name',
   setup() {
     // ...
   },
@@ -77,7 +77,7 @@ import { Ref } from 'vue';
 import { defineViewModel } from 'mvvm-vue-models';
 
 export const useTodoViewModel = defineViewModel({
-  name: "todo",
+  name: 'todo',
   setup(id: Ref<number>) {
     const todo = ref<Todo | undefined>();
     // ...
@@ -97,9 +97,9 @@ const { todo: todoA } = useTodoViewModel(ref(1));
 const { todo: todoB } = useTodoViewModel(ref(1));
 const { todo: todoC } = useTodoViewModel(ref(2));
 
-todoA === todoB // -> true
-todoC !== todoA // -> true
-todoC !== todoB // -> true
+todoA === todoB; // -> true
+todoC !== todoA; // -> true
+todoC !== todoB; // -> true
 ```
 
 Since `todoA` and `todoB` share the same id, 1, the returned todos are the same! But because `todoC` is using a different id, 2, it's not equal to the others.
@@ -109,7 +109,7 @@ Since `todoA` and `todoB` share the same id, 1, the returned todos are the same!
 - Argument types must be uniquely serailizable to a string
 
   > State is kept separate by creating a hash based on the value of each arguments' `toString()`. Passing in a `Ref<Object>` will not work because every object's `toString()` results in `"[object Object]"`, which is not unique.
-  > 
+  >
   > Basic types such as `number`, `string`, and `boolean` are prefered as arguments. But there are work arounds:
   >
   > 1. If you're using classes, you can override the `toString` method to return an ID or some other unique representation
@@ -123,15 +123,23 @@ Since `todoA` and `todoB` share the same id, 1, the returned todos are the same!
 
 By default, all state is cached in memory. When you close or reload the page, that cache is cleared and state forgotten.
 
-To save the state of a view model to `sessionStorage` or `localStorage`, include the `persistence` object when defining your view model:
-
 ```ts
-const usePersistedViewModel = defineViewModel({
-  name: "example",
+const useCountViewModel = defineViewModel({
+  name: 'count',
   persistence: {
     storage: localStorage,
   },
-  // ...
+  setup() {
+    const count = ref(0);
+    const increment = () => {
+      count.value++;
+    };
+
+    return {
+      count,
+      increment,
+    };
+  },
 });
 ```
 

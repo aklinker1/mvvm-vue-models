@@ -5,11 +5,7 @@
         class="flex items-center"
         :class="{ 'pointer-events-none opacity-50': isTogglingCompleted }"
       >
-        <checkbox
-          :checked="todo.completed"
-          class="mr-6 text-xl"
-          @click="toggleCompleted"
-        />
+        <checkbox :checked="todo.completed" class="mr-6 text-xl" @click="toggleCompleted" />
         <h1 class="text-xl font-bold">{{ todo.name }}</h1>
       </div>
       <div>
@@ -25,9 +21,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from "vue";
-import Checkbox from "../components/Checkbox.vue";
-import { useTodoViewModel } from "../state/TodoViewModel";
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import Checkbox from '../components/Checkbox.vue';
+import { useTodoViewModel } from '../state/TodoViewModel';
 
 export default defineComponent({
   components: { Checkbox },
@@ -36,13 +32,8 @@ export default defineComponent({
   },
   setup(props) {
     const todoId = computed(() => Number(props.todoId));
-    const {
-      todo,
-      isLoading,
-      loadTodo,
-      toggleCompleted,
-      isTogglingCompleted,
-    } = useTodoViewModel(todoId);
+    const { todo, isLoading, loadTodo, toggleCompleted, isTogglingCompleted } =
+      useTodoViewModel(todoId);
 
     onMounted(() => {
       if (todo.value == null) loadTodo();

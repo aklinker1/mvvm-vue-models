@@ -6,7 +6,7 @@
         v-for="todo of incompleteTodos"
         :key="todo.id"
         :item="todo"
-        :isTogglingCompleted="isTogglingCompleted"
+        :is-toggling-completed="isTogglingCompleted"
         @toggled="toggleCompleted"
       />
     </ul>
@@ -17,7 +17,7 @@
         v-for="todo of completedTodos"
         :key="todo.id"
         :item="todo"
-        :isTogglingCompleted="isTogglingCompleted"
+        :is-toggling-completed="isTogglingCompleted"
         @toggled="toggleCompleted"
       />
     </ul>
@@ -27,9 +27,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
-import { useTodoListViewModel } from "../state/TodoListViewModel";
-import TodoListItem from "./TodoListItem.vue";
+import { defineComponent, onMounted } from 'vue';
+import { useTodoListViewModel } from '../state/TodoListViewModel';
+import TodoListItem from './TodoListItem.vue';
 
 export default defineComponent({
   components: { TodoListItem },
@@ -51,7 +51,7 @@ export default defineComponent({
       isLoading,
       loadTodos,
       toggleCompleted,
-      isTogglingCompleted
+      isTogglingCompleted,
     };
   },
 });
@@ -65,5 +65,4 @@ export default defineComponent({
 .list {
   @apply space-y-2;
 }
-
 </style>

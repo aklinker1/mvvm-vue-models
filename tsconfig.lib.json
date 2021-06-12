@@ -1,10 +1,10 @@
 {
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "noEmit": false,
-        "declaration": true,
-        "declarationDir": "dist",
-        "emitDeclarationOnly": true,
-    },
-    "include": ["src/library/index.ts"]
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "declarationDir": "dist",
+    "emitDeclarationOnly": true
+  },
+  "include": ["src/library/index.ts"]
 }

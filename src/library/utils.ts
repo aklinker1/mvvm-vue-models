@@ -1,9 +1,10 @@
-import { isReadonly, isRef, Ref } from "vue";
+import { isReadonly, isRef, Ref } from 'vue';
 
 export function getRefValue<T>(ref: Ref<T | undefined>): T | undefined {
   return ref.value == null ? undefined : deepCopy(ref.value);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isEditableRef(ref: unknown): ref is Ref<any> {
   return isRef(ref) && !isReadonly(ref);
 }
