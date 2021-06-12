@@ -1,11 +1,11 @@
-import { computed, ref } from "vue";
+import { computed, Ref, ref } from "vue";
 import { defineViewModel, PersistenceOptions } from "../../library";
 import MockApi from "../utils/MockApi";
 import { RequestState } from "../utils/RequestState";
 
 export const useTodoViewModel = defineViewModel({
   name: "Todo",
-  setup(todoId: number) {
+  setup(todoId: Ref<number>) {
     const todo = ref<Todo | undefined>();
 
     const requestState = ref<RequestState>(RequestState.SUCCESS);
@@ -14,7 +14,7 @@ export const useTodoViewModel = defineViewModel({
     );
     const loadTodo = async () => {
       requestState.value = RequestState.LOADING;
-      todo.value = await MockApi.getTodo(todoId);
+      todo.value = await MockApi.getTodo(todoId.value);
       requestState.value = RequestState.SUCCESS;
     };
 
