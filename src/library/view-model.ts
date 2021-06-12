@@ -1,7 +1,13 @@
-import { computed, isRef, Ref, watch, watchEffect } from "vue";
+import {
+  computed,
+  isRef,
+  reactive,
+  Ref,
+  watch
+} from "vue";
 import logger from "./logger";
 import { managePersistedState, PersistenceOptions } from "./persistence";
-import { getRefValue } from "./utils";
+import { getRefValue, isEditableRef } from "./utils";
 
 /**
  * The allowed types that can be passed as parameters to the view model's `setup` method.
@@ -52,7 +58,7 @@ export type PersistedState<TState> = {
 
 export function defineViewModel<TParams extends Param[], TState>(options: {
   name: string;
-  setup: (...args: TParams) => TState;
+  setup: (...args: WrapRefs<TParams>) => TState;
   persistence?: PersistenceOptions<TState>;
 }): UseViewModel<TParams, TState> {
   const { name: viewModelName, setup, persistence } = options;
@@ -68,12 +74,15 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
     persistence && managePersistedState<TState>(persistence);
   const restorePersistedRefs = managedPersistence?.restorePersistedRefs;
   const persistState = managedPersistence?.persistState;
+  const persistStateWithDelay = managedPersistence?.persistState;
 
   const cachedStates: Record<string, TState | undefined> = {};
 
   function useViewModel(...args: WrapRefs<TParams>) {
-    const getUnwrappedArgs = () => args.map((arg) => arg.value) as TParams;
-    const unwrappedArgs = computed(getUnwrappedArgs);
+    const reactiveArgs = reactive(args) as WrapRefs<TParams>;
+    const unwrappedArgs = computed<TParams>(
+      () => reactiveArgs.map((arg) => arg.value) as TParams
+    );
 
     const getArgsPath = (customArgs: TParams) => {
       const argStringValues = customArgs.map((arg) => arg.toString());
@@ -81,39 +90,59 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
     };
     const argsPath = computed(() => getArgsPath(unwrappedArgs.value));
 
-    const getState = (argsPath: string) => {
+    const getState = (currentArgsPath: string) => {
+      logger.group(`Getting view model for "${currentArgsPath}"`);
       let state: TState;
-      const cachedState = cachedStates[argsPath];
+      const cachedState = cachedStates[currentArgsPath];
       if (cachedState != null) {
+        logger.info("Cache present, reusing cached state:", cachedState);
         state = cachedState;
-        logger.info(
-          `Reusing cached state for ${argsPath}`,
-          JSON.parse(JSON.stringify(state))
-        );
       } else {
-        state = setup(...unwrappedArgs.value);
-        logger.info(
-          `Setting up new view model for ${argsPath}`,
-          JSON.parse(JSON.stringify(state))
-        );
+        state = setup(...reactiveArgs);
+        logger.info("No cached state found, called setup:", state);
       }
+      restorePersistedRefs?.(currentArgsPath, state);
       if (cachedState == null) {
-        cachedStates[argsPath] = state;
+        cachedStates[currentArgsPath] = state;
+        logger.info("Added new state to cache");
       }
-      restorePersistedRefs?.(argsPath, state);
+      logger.info("Initial state:", state);
+      logger.endGroup();
       return state;
     };
     const state = getState(argsPath.value);
+    // @ts-ignore
+    const reactiveState = reactive(state);
 
     watch(argsPath, (newArgsPath, oldArgsPath) => {
+      persistState?.(oldArgsPath, state);
       const newState = getState(newArgsPath);
+      logger.group(`Parameters changed: "${oldArgsPath}" → "${newArgsPath}"`);
       for (const key in newState) {
         const value = newState[key];
-        state[key] = value;
+        const castReactiveState = reactiveState as TState;
+        if (isEditableRef(value)) {
+          logger.info(`Updated ref "${key}":`, {
+            old: castReactiveState[key],
+            new: value.value,
+          });
+          castReactiveState[key] = value.value;
+        } else if (typeof castReactiveState[key] === "function") {
+          logger.info(`Skipping "${key}" because it's a function`);
+        } else if (!isRef(value)) {
+          logger.info(`Updated value "${key}":`, {
+            old: castReactiveState[key],
+            new: value,
+          });
+          castReactiveState[key] = value;
+        } else {
+          logger.info(`Skipping "${key}" because it's computed`);
+        }
       }
+      logger.endGroup();
     });
-    watchEffect(() => {
-      persistState?.(argsPath.value, state);
+    watch(reactiveState, () => {
+      persistStateWithDelay?.(argsPath.value, state);
     });
     return state;
   }
@@ -121,10 +150,11 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
   useViewModel.getState = (
     ...args: TParams
   ): PersistedState<TState> | undefined => {
-    const argsPath = [viewModelName, ...args.map((arg) => arg.toString())].join(
-      "."
-    );
-    const cachedState = cachedStates[argsPath];
+    const currentArgsPath = [
+      viewModelName,
+      ...args.map((arg) => arg.toString()),
+    ].join(".");
+    const cachedState = cachedStates[currentArgsPath];
     if (cachedState) {
       const state = {} as PersistedState<TState>;
       Object.entries(cachedState).forEach(([key, ref]) => {
@@ -135,7 +165,7 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
       return state;
     }
     if (persistence?.storage) {
-      const stateString = persistence.storage.getItem(argsPath);
+      const stateString = persistence.storage.getItem(currentArgsPath);
       if (stateString != null) return JSON.parse(stateString);
     }
     return undefined;
