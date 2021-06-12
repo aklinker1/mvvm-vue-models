@@ -1,10 +1,4 @@
-import {
-  computed,
-  isRef,
-  reactive,
-  Ref,
-  watch
-} from "vue";
+import { computed, isRef, reactive, Ref, watch } from "vue";
 import logger from "./logger";
 import { managePersistedState, PersistenceOptions } from "./persistence";
 import { getRefValue, isEditableRef } from "./utils";
@@ -80,9 +74,12 @@ export function defineViewModel<TParams extends Param[], TState>(options: {
 
   function useViewModel(...args: WrapRefs<TParams>) {
     const reactiveArgs = reactive(args) as WrapRefs<TParams>;
-    const unwrappedArgs = computed<TParams>(
-      () => reactiveArgs.map((arg) => arg.value) as TParams
-    );
+    const unwrappedArgs = computed<TParams>(() => {
+      const unwrappedArgs = reactiveArgs.map((arg) => arg.value) as TParams;
+      // remove extra args that weren't defined by the setup function (function.length = number of defined args)
+      unwrappedArgs.length = setup.length;
+      return unwrappedArgs;
+    });
 
     const getArgsPath = (customArgs: TParams) => {
       const argStringValues = customArgs.map((arg) => arg.toString());
