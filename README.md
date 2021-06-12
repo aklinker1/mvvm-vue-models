@@ -115,12 +115,15 @@ export default defineComponent({
 
 ### Parameterized State
 
-A view model can be parameterized by adding arguments to the setup function.
+A view model can be "parameterized" by adding arguments to the setup function.
 
 ```ts
 export const useTodoViewModel = defineViewModel({
   name: "todo",
-  setup(id: number) {
+  setup(
+    // All parameters need to be of type `Ref`, otherwise the view model will not be able to react to changes
+    id: Ref<number>
+  ) {
     const todo = ref<Todo | undefined>();
     // ...
     return {
@@ -130,38 +133,11 @@ export const useTodoViewModel = defineViewModel({
 });
 ```
 
-Even though the `setup` function is defined to accept a plain `number`, you actually need to pass in a `Ref<number>` when using the view model in a component. In this case, we're using `vue-router` and the todo's ID is apart of the URL:
+Now, this view model's state will be shared between all instances with the same combination of parameters.
 
-```ts
-function useRouteParam<T>(param: string): Ref<T> {
-  const route = useRoute();
-  const paramValue = ref<T>(route.params[param]);
-  watch(
-    () => route.params,
-    (newParams) => {
-      paramValue.value = newParams[param];
-    }
-  );
-  return paramValue;
-}
+> For view models with 0 arguments, the state is shared between all view model instances.
 
-export default defineComponent({
-  setup() {
-    // Get the `Ref<number>`
-    const todoIdString = useRouteParam<string>('todoId');
-    const todoId = computed(() => Number(todoIdString.value));
-    
-    // Pass in the `Ref<number>`
-    const { todo } = useTodoViewModel(todoId);
-    
-    ...
-  },
-});
-```
-
-> By passing in the `Ref` instead of the plain value, the view model is able to react when the arguments are changed and update the state to match the state for the new combination of arguments.
-
-A view model's state is shared between all instances with the same combination of arguments. Keep this in in mind because **parameters can be abused by over parameterizing the view model**. The only parameters that should be passed in are ones that need separate state.
+Looking at the code below, since `todoA` and `todoB` share the same parameter, the returned state is the exact same.
 
 ```ts
 const todoId1 = ref(1);
@@ -171,16 +147,29 @@ const { todo: todoA } = useTodoViewModel(todoId1);
 const { todo: todoB } = useTodoViewModel(todoId1);
 const { todo: todoC } = useTodoViewModel(todoId2);
 
-// `todoA` is the exact same object as `todoB` because their parameters are equal
-console.log(todoA === todoB); // -> true
-
-// `todoC` is different because it's parameter value is different
-console.log(todoA === todoC); // -> false
-console.log(todoB === todoC); // -> false
+todoA === todoB // -> true
 ```
 
-Parameters also have to be serializable to a string. You cannot simply pass in an object and expect parameterization to work. State is kept secret by creating a hash based on the value of each param's `toString` function. Without a `toString` method, the object could result in `"[object Object]"` instead of some kind of identifier inside the object. `string`s, `number`s, and `boolean`s all work without a custom `toString` function.
+But because `todoC` is using a different parameter, it's not equal to the other todos.
 
+```ts
+todoC === todoA // -> false
+todoC === todoB // -> false
+```
+
+Caveots:
+
+- Argument types must be uniquely serailizable to a string
+
+  > State is kept separate by creating a hash based on the value of each argument's `toString` function. Passing in a `Ref<Object>` will not work because every object's `toString()` results in `"[object Object]"`, which is not unique.
+  >
+  > If you're using classes, you can override the `toString` method to return an ID or something else unique.
+  >
+  > If you're using plain objects, you can create a computed ref based on that object's id or some other unique string to represent the object.
+
+- Don't over parameterize your view model
+
+  > Only include parameters that, when any are changed, should result in separate state
 
 ### Persistence
 
