@@ -1,5 +1,7 @@
 # MVVM Vue Models
 
+❗ **This was an experiment into state management, it does not work, do not use. It is unmaintained** ❗
+
 ```bash
 yarn add mvvm-vue-models
 # Or
